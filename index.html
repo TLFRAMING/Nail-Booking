@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nail Booking Demo</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #fff5f7;
+}
+
+/* 顶部 */
+.hero {
+  text-align: center;
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #ff9eb5, #ffc3a0);
+  color: white;
+}
+
+.hero h1 {
+  font-size: 32px;
+}
+
+.hero p {
+  margin-top: 10px;
+}
+
+.hero button {
+  margin-top: 20px;
+  padding: 12px 25px;
+  border: none;
+  background: white;
+  color: #ff6f91;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* 作品 */
+.gallery {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.grid img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+/* 功能 */
+.features {
+  padding: 40px 20px;
+  background: white;
+  text-align: center;
+}
+
+.features h2 {
+  margin-bottom: 20px;
+}
+
+.features ul {
+  list-style: none;
+  padding: 0;
+}
+
+.features li {
+  margin: 10px 0;
+}
+
+/* CTA */
+.cta {
+  text-align: center;
+  padding: 50px;
+}
+
+.cta button {
+  padding: 15px 30px;
+  background: #ff6f91;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- 顶部 -->
+<div class="hero">
+  <h1>💅 Anna Nail Studio</h1>
+  <p>Book your appointment online in seconds</p>
+  <button onclick="window.location.href='index.html'">Book Now</button>
+</div>
+
+<!-- 作品 -->
+<div class="gallery">
+  <h2>✨ Our Work</h2>
+  <div class="grid">
+    <img src="https://images.unsplash.com/photo-1604654894610-df63bc536371">
+    <img src="https://images.unsplash.com/photo-1583001931096-959e9a1a6223">
+    <img src="https://images.unsplash.com/photo-1610992015732-2449b76344bc">
+    <img src="https://images.unsplash.com/photo-1604654894611-6973b376cb1a">
+  </div>
+</div>
+
+<!-- 功能 -->
+<div class="features">
+  <h2>Why Use This Booking System?</h2>
+  <ul>
+    <li>✔ Clients book online 24/7</li>
+    <li>✔ No double booking</li>
+    <li>✔ Easy appointment management</li>
+    <li>✔ Works on phone</li>
+    <li>✔ Show your nail designs</li>
+  </ul>
+</div>
+
+<!-- CTA -->
+<div class="cta">
+  <h2>Ready to get more clients?</h2>
+  <button>Get Your Website</button>
+</div>
+
+</body>
+</html>

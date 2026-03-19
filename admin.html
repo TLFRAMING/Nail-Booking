@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后台管理</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background: #f7f7f7;
+}
+
+.container {
+  max-width: 500px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+input, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+button {
+  background: #ff6f91;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+h2 {
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>后台登录</h2>
+
+<input type="email" id="email" placeholder="管理员邮箱">
+<input type="password" id="password" placeholder="密码">
+<button onclick="login()">登录</button>
+
+<hr>
+
+<h2>预约列表</h2>
+<ul id="list"></ul>
+
+<hr>
+
+<h2>上传作品</h2>
+
+<input type="file" id="file">
+<button onclick="upload()">上传图片</button>
+
+<p id="status"></p>
+
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBXeviALbueAUyOGdCx0M3sg7TF5fg_vf0",
+  authDomain: "nail-booking-daa5d.firebaseapp.com",
+  projectId: "nail-booking-daa5d",
+  storageBucket: "nail-booking-daa5d.firebasestorage.app",
+  messagingSenderId: "453192087054",
+  appId: "1:453192087054:web:cd8e31489105942438ee5f"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+// ✅ 登录
+function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      alert("登录成功");
+      loadData();
+    })
+    .catch(err => alert(err.message));
+}
+
+// ✅ 加载预约
+function loadData() {
+  db.collection("appointments")
+    .orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+      const list = document.getElementById("list");
+      list.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const li = document.createElement("li");
+        li.innerText = `${data.date} ${data.time} - ${data.name}`;
+        list.appendChild(li);
+      });
+    });
+}
+
+// ✅ 上传图片
+async function upload() {
+  const file = document.getElementById("file").files[0];
+  const status = document.getElementById("status");
+
+  if (!file) {
+    status.innerText = "请选择图片";
+    return;
+  }
+
+  const storageRef = storage.ref("gallery/" + Date.now() + "_" + file.name);
+
+  await storageRef.put(file);
+
+  const url = await storageRef.getDownloadURL();
+
+  await db.collection("gallery").add({
+    imageUrl: url,
+    createdAt: new Date()
+  });
+
+  status.innerText = "上传成功 ✅";
+}
+</script>
+
+</body>
+</html>
