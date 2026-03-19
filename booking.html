@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>美甲预约</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<style>
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: #fff5f7;
+}
+
+/* 顶部 */
+.header {
+  text-align: center;
+  padding: 40px;
+  background: linear-gradient(135deg, #ff9eb5, #ffc3a0);
+  color: white;
+}
+
+/* 作品 */
+.gallery {
+  padding: 30px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.grid img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+/* 预约 */
+.booking {
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+}
+
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  width: 320px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  background: #ff6f91;
+  color: white;
+  border: none;
+  border-radius: 8px;
+}
+
+.msg {
+  text-align: center;
+  margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h1>💅 美甲预约</h1>
+  <p>专业美甲 · 在线预约</p>
+</div>
+
+<!-- 作品展示 -->
+<div class="gallery">
+  <h2>✨ 我的作品</h2>
+  <div class="grid" id="galleryGrid"></div>
+</div>
+
+<!-- 预约 -->
+<div class="booking">
+  <div class="card">
+    <h2>预约时间</h2>
+
+<input type="text" id="name" placeholder="你的名字">
+<input type="email" id="email" placeholder="你的邮箱">
+<input type="date" id="date">
+
+<select id="time">
+  <option value="Morning">Morning (9AM - 12PM)</option>
+  <option value="Afternoon">Afternoon (12PM - 4PM)</option>
+  <option value="Evening">Evening (4PM - 8PM)</option>
+</select>
+
+<h3>选择服务</h3>
+<select id="service" onchange="updateTotal()">
+  <option value="Gel Fill|55">Gel Fill - $55</option>
+  <option value="Gel Set|60">Gel Set - $60</option>
+  <option value="Pedicure|45">Pedicure - $45</option>
+</select>
+
+<h3>附加项目</h3>
+<label><input type="checkbox" value="Nail Art|10" onchange="updateTotal()"> Nail Art (+$10)</label><br>
+<label><input type="checkbox" value="French Tip|10" onchange="updateTotal()"> French Tip (+$10)</label><br>
+<label><input type="checkbox" value="Removal|15" onchange="updateTotal()"> Removal (+$15)</label>
+
+<p id="total">Total: $55</p>
+
+<textarea id="note" placeholder="描述款式 / 留下Instagram"></textarea>
+
+<button onclick="book()">立即预约</button>
+
+<div id="msg" class="msg"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBXeviALbueAUyOGdCx0M3sg7TF5fg_vf0",
+  authDomain: "nail-booking-daa5d.firebaseapp.com",
+  projectId: "nail-booking-daa5d",
+  storageBucket: "nail-booking-daa5d.firebasestorage.app",
+  messagingSenderId: "453192087054",
+  appId: "1:453192087054:web:cd8e31489105942438ee5f"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ✅ 加载作品
+function loadGallery() {
+  const grid = document.getElementById("galleryGrid");
+
+  db.collection("gallery")
+    .orderBy("createdAt", "desc")
+    .onSnapshot(snapshot => {
+      grid.innerHTML = "";
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+
+        const img = document.createElement("img");
+        img.src = data.imageUrl;
+
+        grid.appendChild(img);
+      });
+    });
+}
+
+// ✅ 预约
+function updateTotal() {
+  const service = document.getElementById("service").value;
+  let total = parseInt(service.split("|")[1]);
+
+  const checkboxes = document.querySelectorAll("input[type=checkbox]:checked");
+
+  checkboxes.forEach(cb => {
+    total += parseInt(cb.value.split("|")[1]);
+  });
+
+  document.getElementById("total").innerText = "Total: $" + total;
+}
+
+async function book() {
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const date = document.getElementById("date").value;
+  const time = document.getElementById("time").value;
+  const note = document.getElementById("note").value;
+  const msg = document.getElementById("msg");
+
+  if (!name || !email || !date) {
+    msg.innerHTML = "❌ 请填写完整信息";
+    return;
+  }
+
+  const serviceValue = document.getElementById("service").value;
+  const serviceName = serviceValue.split("|")[0];
+
+  const checkboxes = document.querySelectorAll("input[type=checkbox]:checked");
+
+  let addons = [];
+  let total = parseInt(serviceValue.split("|")[1]);
+
+  checkboxes.forEach(cb => {
+    const name = cb.value.split("|")[0];
+    const price = parseInt(cb.value.split("|")[1]);
+
+    addons.push(name);
+    total += price;
+  });
+
+  const id = date + "_" + time;
+
+  const doc = await db.collection("appointments").doc(id).get();
+
+  if (doc.exists) {
+    msg.innerHTML = "❌ 该时间已被预约";
+    return;
+  }
+
+  await db.collection("appointments").doc(id).set({
+    name,
+    email,
+    date,
+    time,
+    service: serviceName,
+    addons: addons,
+    total: total,
+    note,
+    createdAt: new Date()
+  });
+
+  msg.innerHTML = "✅ 预约成功！";
+}</script>
+
+</body>
+</html>
